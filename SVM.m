@@ -181,7 +181,9 @@ for avg_con = 1:avcon
         test_con = mem_con(outer_test(:,a_con),:);
         test_con(:,65) = test_con(randperm(size(test_con,1)),65);
 
-        mdl_con = fitcsvm(mem_con_a(:,1:64),mem_con_a(:,65),'BoxConstraint',all_box(avg_con),'KernelFunction','gaussian','KernelScale',all_sig(avg_con),'Standardize',true);
+        mdl_con = fitcsvm(mem_con_a(:,1:64),mem_con_a(:,65),'BoxConstraint',
+                                    all_box(avg_con),'KernelFunction','gaussian',
+                                    'KernelScale',all_sig(avg_con),'Standardize',true);
 
         trainPreds_con = predict(mdl_con,mem_con_a(:,1:64));
         valPreds_con = predict(mdl_con,test_con(:,1:64));
