@@ -5,6 +5,11 @@ import pandas as pd
 from tensorflow import feature_column
 from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
+from sklearn import datasets
+from sklearn import metrics
+from sklearn.ensemble import ExtraTreesClassifier
+from sklearn.feature_selection import RFE
+from sklearn.linear_model import LogisticRegression
 import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # turn off irrelevant warning      
@@ -20,6 +25,7 @@ with h5py.File(path+'indmaps100.mat', 'r') as allmaps:
     print(allmaps['allmaps'].shape)
 '''
 
+
 def input_function():
     "Prepare dataset in shape of (observations, features)"
     path = os.path.dirname(os.path.abspath(__file__))
@@ -32,9 +38,9 @@ def input_function():
     data = np.concatenate((mem_labels_0, mem_labels_1), axis=0)
     columns = [str(i) for i in range(0, data.shape[1])]
     df = pd.DataFrame(data=data,
-                  index=pd.RangeIndex(0,data.shape[0]),
-                  columns=columns,
-                  dtype=np.float32)
+                      index=pd.RangeIndex(0,data.shape[0]),
+                      columns=columns,
+                      dtype=np.float32)
     return df, columns
 
 df, columns = input_function()
@@ -54,31 +60,33 @@ def df_to_ds(df, shuffle=True, batch_size=64):
 def model(train, val, test, columns):
     "Building, compiling, fitting, and evaluating model"
     feature_columns = []
-    for header in columns[0:64]:
+    for header in columns[0:len(columns)-1]:
         feature_columns.append(feature_column.numeric_column(header))
     feature_layer = layers.DenseFeatures(feature_columns)
 
     model = tf.keras.Sequential([
     feature_layer,
-    layers.Dense(64, activation='relu'), 
     layers.Dense(64, activation='relu'),
+    layers.Dropout(0.5), 
+    layers.Dense(64, activation='relu'),
+    layers.Dropout(0.5),
     layers.Dense(1, activation='sigmoid')
     ])
 
     model.compile(optimizer='adam',
-                loss='binary_crossentropy',
-                metrics=['accuracy'])
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
 
     model.fit(train,
-            validation_data=val,
-            epochs=10)
+              validation_data=val,
+              epochs=7)
 
     loss, accuracy = model.evaluate(test)
     print("Accuracy", accuracy)
 
 
-train, test = train_test_split(df, test_size=0.3)
-train, val = train_test_split(train, test_size=0.4)
+train, test = train_test_split(df, test_size=0.2)
+train, val = train_test_split(train, test_size=0.2)
 
 train_ds = df_to_ds(train)
 val_ds = df_to_ds(val)
