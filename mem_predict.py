@@ -5,11 +5,6 @@ import pandas as pd
 from tensorflow import feature_column
 from tensorflow.keras import layers
 from sklearn.model_selection import train_test_split
-from sklearn import datasets
-from sklearn import metrics
-from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.feature_selection import RFE
-from sklearn.linear_model import LogisticRegression
 import tensorflow as tf
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2' # turn off irrelevant warning      
